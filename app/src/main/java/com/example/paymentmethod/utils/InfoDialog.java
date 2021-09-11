@@ -31,7 +31,7 @@ public class InfoDialog {
         ImageView dialogIcon = dialog.findViewById(R.id.id_dialog_icon);
 
         if (isNoInternet) {
-            dialogText.setText("No Internet!\nPlease check your internet connection");
+            dialogText.setText(errorStr);
             dialogIcon.setImageDrawable(ContextCompat.getDrawable(mActivity, R.drawable.ic_no_signal));
         } else {
             dialogText.setText("Something went wrong!\nError: " + errorStr);

@@ -28,6 +28,8 @@ public class MainActivity extends AppCompatActivity{
     private InfoDialog mInfoDialog;
     private static final String BASE_URL  = "https://raw.githubusercontent.com/optile/checkout-android/develop/shared-test/lists/";
     private SpinKitView mSpinKitView;
+    private DataLoadComplete mDataLoadComplete;
+    private ListResult mListResult;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,8 +45,15 @@ public class MainActivity extends AppCompatActivity{
                 e.printStackTrace();
             }
         } else {
-            mInfoDialog.showDialog(true, "");
+            mInfoDialog.showDialog(true, "No Internet!\nPlease check your internet connection");
         }
+        setDataLoadCompleted(new DataLoadComplete() {
+            @Override
+            public void onDataLoadCompleted() {
+                mSpinKitView.setVisibility(View.GONE);
+                configureRecyclerView(mListResult);
+            }
+        });
     }
 
     private void getData() throws IOException{
@@ -56,8 +65,8 @@ public class MainActivity extends AppCompatActivity{
             public void onResponse(Call<ListResult> call, Response<ListResult> response) {
                 if (response.isSuccessful()) {
                     if (response.body() != null) {
-                        mSpinKitView.setVisibility(View.GONE);
-                        configureRecyclerView(response.body());
+                        mListResult = response.body();
+                        mDataLoadComplete.onDataLoadCompleted();
                     }
                 } else {
                     mInfoDialog.showDialog(false, String.valueOf(response.code()));
@@ -83,5 +92,13 @@ public class MainActivity extends AppCompatActivity{
                 = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
         return activeNetworkInfo != null && activeNetworkInfo.isConnected();
+    }
+
+    interface DataLoadComplete {
+        void onDataLoadCompleted();
+    }
+
+    private void setDataLoadCompleted(DataLoadComplete dataLoadComplete) {
+        mDataLoadComplete = dataLoadComplete;
     }
 }
